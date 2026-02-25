@@ -112,7 +112,19 @@
     "cta": "Submit request",
     "discount1": "10-15% discount for annual payment",
     "discount2": "Referral program: bring a client — get 10% discount",
-    "area": "m²"
+    "area": "m²",
+    "fulfillmentBadge": "Basic model",
+    "fulfillmentTitle": "Fulfillment",
+    "fulfillmentPrice": "$1,000",
+    "fulfillmentPeriod": "/month",
+    "fulfillmentDesc": "Subscription fee + pay per delivery. Fixed in contract.",
+    "fulfillmentFeature1": "5 locations in the city",
+    "fulfillmentFeature2": "Delivery 0.5¢ per kg/unit",
+    "fulfillmentFeature3": "Minimum fixed costs",
+    "fulfillmentFeature4": "Pay only for actual deliveries",
+    "fulfillmentFeature5": "Basic reporting",
+    "fulfillmentFeature6": "Standard SLA",
+    "fulfillmentCta": "Request terms"
   },
   "cta": {
     "title": "Have questions?",

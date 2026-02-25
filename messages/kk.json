@@ -112,7 +112,19 @@
     "cta": "Өтінім қалдыру",
     "discount1": "Жылдық төлемде 10-15% жеңілдік",
     "discount2": "Реферал бағдарламасы: клиент әкел — 10% жеңілдік",
-    "area": "м²"
+    "area": "м²",
+    "fulfillmentBadge": "Негізгі модель",
+    "fulfillmentTitle": "Фулфилмент",
+    "fulfillmentPrice": "$1 000",
+    "fulfillmentPeriod": "/ай",
+    "fulfillmentDesc": "Абоненттік төлем + жеткізу үшін төлем. Шартта бекітіледі.",
+    "fulfillmentFeature1": "Қала бойынша 5 локация",
+    "fulfillmentFeature2": "Жеткізу 0.5¢ кг/бірлік үшін",
+    "fulfillmentFeature3": "Тұрақты шығындар минимумы",
+    "fulfillmentFeature4": "Тек нақты жеткізулер үшін төлем",
+    "fulfillmentFeature5": "Базалық есептілік",
+    "fulfillmentFeature6": "Стандартты SLA",
+    "fulfillmentCta": "Шарттарды сұрау"
   },
   "cta": {
     "title": "Сұрақтар қалды ма?",

@@ -112,7 +112,19 @@
     "cta": "Оставить заявку",
     "discount1": "Скидка 10–15% при оплате за год",
     "discount2": "Реферальная программа: приведи клиента — скидка 10%",
-    "area": "м²"
+    "area": "м²",
+    "fulfillmentBadge": "Основная модель",
+    "fulfillmentTitle": "Фулфилмент",
+    "fulfillmentPrice": "$1 000",
+    "fulfillmentPeriod": "/мес",
+    "fulfillmentDesc": "Абонентская плата + оплата за выдачу. Фиксируется в договоре.",
+    "fulfillmentFeature1": "5 локаций по городу",
+    "fulfillmentFeature2": "Выдача 0.5¢ за кг/единицу",
+    "fulfillmentFeature3": "Минимум фиксированных затрат",
+    "fulfillmentFeature4": "Оплата только за реальные выдачи",
+    "fulfillmentFeature5": "Базовая отчётность",
+    "fulfillmentFeature6": "Стандартные SLA",
+    "fulfillmentCta": "Запросить условия"
   },
   "cta": {
     "title": "Остались вопросы?",
