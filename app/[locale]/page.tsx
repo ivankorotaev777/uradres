@@ -328,7 +328,7 @@ const Pricing = () => {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {/* Старт */}
           <Card className="bg-white border-border relative overflow-hidden hover:border-brand-300 hover:shadow-lg transition-all">
             <CardHeader className="pb-3 pt-5">
@@ -445,41 +445,6 @@ const Pricing = () => {
               <Button variant="outline" className="w-full" asChild>
                 <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
                   {t("cta")}
-                </a>
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          {/* Фулфилмент */}
-          <Card className="bg-gradient-to-b from-slate-900 to-slate-800 border-slate-700 text-white relative overflow-hidden hover:border-slate-600 hover:shadow-lg transition-all">
-            <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-bl-full" />
-            <CardHeader className="pb-3 pt-5">
-              <div className="flex items-center justify-between mb-3">
-                <Badge className="bg-slate-700 text-slate-300 border-slate-600">
-                  {t("fulfillmentBadge")}
-                </Badge>
-              </div>
-              <div className="mb-1">
-                <span className="text-3xl font-semibold text-white">{t("fulfillmentPrice")}</span>
-                <span className="text-slate-400 ml-1">{t("fulfillmentPeriod")}</span>
-              </div>
-              <p className="text-sm text-slate-400">{t("fulfillmentDesc")}</p>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-0">
-              <ul className="space-y-2.5">
-                {["fulfillmentFeature1", "fulfillmentFeature2", "fulfillmentFeature3", "fulfillmentFeature4", "fulfillmentFeature5", "fulfillmentFeature6"].map((key, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-200">{t(key)}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button className="w-full bg-slate-700 text-white hover:bg-slate-600 border border-slate-600" asChild>
-                <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
-                  {t("fulfillmentCta")}
-                  <ArrowRight className="ml-2 w-4 h-4" />
                 </a>
               </Button>
             </CardFooter>

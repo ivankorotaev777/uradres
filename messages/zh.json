@@ -112,19 +112,7 @@
     "cta": "提交申请",
     "discount1": "年付享受10-15%折扣",
     "discount2": "推荐计划：带来客户——获得10%折扣",
-    "area": "平方米",
-    "fulfillmentBadge": "基础模式",
-    "fulfillmentTitle": "履约服务",
-    "fulfillmentPrice": "1,000美元",
-    "fulfillmentPeriod": "/月",
-    "fulfillmentDesc": "订阅费 + 按配送付费。合同中固定。",
-    "fulfillmentFeature1": "全市5个地点",
-    "fulfillmentFeature2": "配送0.5美分/公斤或件",
-    "fulfillmentFeature3": "最低固定成本",
-    "fulfillmentFeature4": "仅按实际配送付费",
-    "fulfillmentFeature5": "基础报告",
-    "fulfillmentFeature6": "标准SLA",
-    "fulfillmentCta": "咨询条款"
+    "area": "平方米"
   },
   "cta": {
     "title": "还有疑问？",

@@ -112,19 +112,7 @@
     "cta": "Ariza qoldirish",
     "discount1": "Yillik to'lovda 10-15% chegirma",
     "discount2": "Referal dasturi: mijoz keltiring — 10% chegirma",
-    "area": "m²",
-    "fulfillmentBadge": "Asosiy model",
-    "fulfillmentTitle": "Fulfillment",
-    "fulfillmentPrice": "$1 000",
-    "fulfillmentPeriod": "/oy",
-    "fulfillmentDesc": "Obuna to'lovi + yetkazib berish uchun to'lov. Shartnomada belgilanadi.",
-    "fulfillmentFeature1": "Shahar bo'ylab 5 ta lokatsiya",
-    "fulfillmentFeature2": "Yetkazib berish 0.5¢ kg/birlik uchun",
-    "fulfillmentFeature3": "Minimal doimiy xarajatlar",
-    "fulfillmentFeature4": "Faqat haqiqiy yetkazib berishlar uchun to'lov",
-    "fulfillmentFeature5": "Bazaviy hisobot",
-    "fulfillmentFeature6": "Standart SLA",
-    "fulfillmentCta": "Shartlarni so'rash"
+    "area": "m²"
   },
   "cta": {
     "title": "Savollar qoldimi?",
