@@ -85,7 +85,6 @@ export default async function LocaleLayout({
             gtag('config', 'AW-17971424682');
           `}
         </Script>
-        <Script src="https://server.fillout.com/embed/v1/" strategy="afterInteractive" />
       </head>
       <body className={`${onest.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
