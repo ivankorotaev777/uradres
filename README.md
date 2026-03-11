@@ -1,5 +1,18 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Локальный запуск
+
+1. В терминале в папке проекта:
+   ```bash
+   npm run dev
+   ```
+2. Открой в браузере **http://localhost:3005**  
+   (Порт 3005 задан в проекте, чтобы не конфликтовать с другими приложениями.)
+
+Если страница не открывается — проверь, что в терминале есть строка `✓ Ready` и что в адресной строке именно **localhost:3005**.
+
+---
+
 ## Getting Started
 
 First, run the development server:
@@ -14,7 +27,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open **http://localhost:3005** with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

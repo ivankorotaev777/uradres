@@ -468,11 +468,33 @@ const Pricing = () => {
   );
 };
 
+const RequestFormSection = () => {
+  const t = useTranslations("requestForm");
+  return (
+    <section className="py-5 lg:py-7 bg-background">
+      <div className="container mx-auto px-4">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-semibold mb-8 text-center text-foreground">
+            {t("title")}
+          </h2>
+          <div
+            style={{ width: "80%", height: "500px", marginLeft: "auto", marginRight: "auto" }}
+            data-fillout-id="ixaH3FnMAbus"
+            data-fillout-embed-type="standard"
+            data-fillout-inherit-parameters=""
+            data-fillout-domain="form.latenode.com"
+          />
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const CTA = () => {
   const t = useTranslations("cta");
   
   return (
-    <section className="py-10 lg:py-14 bg-background relative overflow-hidden">
+    <section className="py-5 lg:py-7 bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-background to-navy-50" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[250px] bg-brand-400/10 rounded-full blur-[100px]" />
       
@@ -529,6 +551,7 @@ export default function Home() {
       <Testimonials />
       <Product />
       <Pricing />
+      <RequestFormSection />
       <CTA />
       <Footer />
     </main>

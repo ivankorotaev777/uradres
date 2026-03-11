@@ -4,7 +4,12 @@ const withNextIntl = createNextIntlPlugin("./i18n.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  transpilePackages: ["next-intl"],
+  webpack: (config) => {
+    // Убирает предупреждения о кэше из-за динамического import() в next-intl
+    config.infrastructureLogging = { level: "error" };
+    return config;
+  },
 };
 
 export default withNextIntl(nextConfig);

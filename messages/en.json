@@ -114,6 +114,14 @@
     "discount2": "Referral program: bring a client — get 10% discount",
     "area": "m²"
   },
+  "requestForm": {
+    "title": "Submit request"
+  },
+  "thankYou": {
+    "title": "Thank you for submitting the form",
+    "description": "We have received your request and will contact you shortly.",
+    "backHome": "Back to home"
+  },
   "cta": {
     "title": "Have questions?",
     "description": "Write to us on Telegram — we'll respond within 15 minutes and help you find the right address for your task.",

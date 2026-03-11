@@ -114,6 +114,14 @@
     "discount2": "推荐计划：带来客户——获得10%折扣",
     "area": "平方米"
   },
+  "requestForm": {
+    "title": "提交申请"
+  },
+  "thankYou": {
+    "title": "感谢您填写表单",
+    "description": "我们已收到您的申请，将尽快与您联系。",
+    "backHome": "返回首页"
+  },
   "cta": {
     "title": "还有疑问？",
     "description": "通过Telegram联系我们——15分钟内回复，帮您找到适合您任务的地址。",

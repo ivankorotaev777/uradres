@@ -114,6 +114,14 @@
     "discount2": "Referal dasturi: mijoz keltiring — 10% chegirma",
     "area": "m²"
   },
+  "requestForm": {
+    "title": "Ariza qoldirish"
+  },
+  "thankYou": {
+    "title": "Arizani to'ldirganingiz uchun rahmat",
+    "description": "Arizangiz qabul qilindi, tez orada siz bilan bog'lanamiz.",
+    "backHome": "Bosh sahifaga"
+  },
   "cta": {
     "title": "Savollar qoldimi?",
     "description": "Telegramga yozing — 15 daqiqa ichida javob beramiz va vazifangizga mos manzil tanlashga yordam beramiz.",
