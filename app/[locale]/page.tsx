@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -471,16 +471,24 @@ const Pricing = () => {
 
 const RequestFormSection = () => {
   const t = useTranslations("requestForm");
+  const locale = useLocale();
 
   useEffect(() => {
     const scriptId = "fillout-embed-script";
-    if (document.getElementById(scriptId)) return;
+    const existing = document.getElementById(scriptId);
+    if (existing) existing.remove();
+
     const script = document.createElement("script");
     script.id = scriptId;
     script.src = "https://server.fillout.com/embed/v1/";
     script.async = true;
     document.body.appendChild(script);
-  }, []);
+
+    return () => {
+      const s = document.getElementById(scriptId);
+      if (s) s.remove();
+    };
+  }, [locale]);
 
   return (
     <section className="py-5 lg:py-7 bg-background">
