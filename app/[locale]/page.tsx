@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -62,16 +63,10 @@ const Hero = () => {
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Button size="default" className="px-6 py-2.5 rounded-full bg-gradient-brand hover:opacity-90 transition-all shadow-md shadow-brand-500/20" asChild>
-              <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+              <Link href="/#request-form">
                 {t("cta")}
                 <ArrowRight className="ml-2 w-4 h-4" />
-              </a>
-            </Button>
-            <Button size="default" variant="outline" className="px-6 py-2.5 rounded-full" asChild>
-              <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
-                <Send className="mr-2 w-4 h-4" />
-                {t("telegram")}
-              </a>
+              </Link>
             </Button>
           </div>
           
@@ -154,6 +149,7 @@ const PainPoints = () => {
 
 const Benefits = () => {
   const t = useTranslations("benefits");
+  const tForm = useTranslations("requestForm");
   
   const items = [
     { icon: ShieldCheck, titleKey: "item1Title", descKey: "item1Desc", highlightKey: "item1Highlight" },
@@ -186,10 +182,15 @@ const Benefits = () => {
               </CardHeader>
               <CardContent className="relative pt-0">
                 <p className="text-muted-foreground text-base mb-4">{t(item.descKey)}</p>
-                <Badge variant="secondary" className="text-sm font-normal">
-                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+                  <CheckCircle2 className="w-4 h-4 text-brand-500 flex-shrink-0" />
                   {t(item.highlightKey)}
-                </Badge>
+                </div>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href="/#request-form">
+                    {tForm("title")}
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -364,9 +365,9 @@ const Pricing = () => {
             </CardContent>
             <CardFooter className="pt-0">
               <Button variant="outline" className="w-full" asChild>
-                <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+                <Link href="/#request-form">
                   {t("cta")}
-                </a>
+                </Link>
               </Button>
             </CardFooter>
           </Card>
@@ -406,10 +407,10 @@ const Pricing = () => {
             </CardContent>
             <CardFooter className="pt-0">
               <Button className="w-full bg-white text-brand-700 hover:bg-brand-50 font-medium" asChild>
-                <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+                <Link href="/#request-form">
                   {t("cta")}
                   <ArrowRight className="ml-2 w-4 h-4" />
-                </a>
+                </Link>
               </Button>
             </CardFooter>
           </Card>
@@ -444,9 +445,9 @@ const Pricing = () => {
             </CardContent>
             <CardFooter className="pt-0">
               <Button variant="outline" className="w-full" asChild>
-                <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+                <Link href="/#request-form">
                   {t("cta")}
-                </a>
+                </Link>
               </Button>
             </CardFooter>
           </Card>
@@ -472,6 +473,7 @@ const Pricing = () => {
 const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const scriptId = "fillout-embed-script";
@@ -490,15 +492,21 @@ const RequestFormSection = () => {
     };
   }, [locale]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [locale]);
+
   return (
-    <section className="py-5 lg:py-7 bg-background">
+    <section id="request-form" ref={sectionRef} className="py-5 lg:py-7 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-semibold mb-8 text-center text-foreground">
             {t("title")}
           </h2>
           <div
-            style={{ width: "80%", height: "500px", marginLeft: "auto", marginRight: "auto" }}
+            style={{ width: "80%", height: "420px", marginLeft: "auto", marginRight: "auto" }}
             data-fillout-id="ixaH3FnMAbus"
             data-fillout-embed-type="standard"
             data-fillout-inherit-parameters=""

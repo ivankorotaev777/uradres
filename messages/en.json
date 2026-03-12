@@ -5,7 +5,7 @@
     "payment": "Payment",
     "guarantees": "Guarantees",
     "contacts": "Contacts",
-    "write": "Contact us"
+    "write": "Submit request"
   },
   "hero": {
     "badge": "50+ locations across Tashkent",
@@ -118,8 +118,9 @@
     "title": "Submit request"
   },
   "thankYou": {
-    "title": "Thank you for submitting the form",
-    "description": "We have received your request and will contact you shortly.",
+    "title": "Thank you for filling out the form!",
+    "description": "Write to us on Telegram",
+    "telegram": "Write on Telegram",
     "backHome": "Back to home"
   },
   "cta": {

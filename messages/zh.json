@@ -5,7 +5,7 @@
     "payment": "支付",
     "guarantees": "保证",
     "contacts": "联系方式",
-    "write": "联系我们"
+    "write": "提交申请"
   },
   "hero": {
     "badge": "塔什干全市50+地点",
@@ -118,8 +118,9 @@
     "title": "提交申请"
   },
   "thankYou": {
-    "title": "感谢您填写表单",
-    "description": "我们已收到您的申请，将尽快与您联系。",
+    "title": "感谢您填写表单！",
+    "description": "请通过Telegram联系我们",
+    "telegram": "通过Telegram联系",
     "backHome": "返回首页"
   },
   "cta": {

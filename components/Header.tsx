@@ -102,10 +102,10 @@ export function Header() {
               +998 90 347 86 92
             </a>
             <Button size="sm" className="bg-gradient-brand" asChild>
-              <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+              <Link href="/#request-form">
                 <Send className="w-4 h-4 mr-2" />
                 {t("write")}
-              </a>
+              </Link>
             </Button>
           </div>
 
@@ -179,10 +179,10 @@ export function Header() {
                 +998 90 347 86 92
               </a>
               <Button size="sm" className="bg-gradient-brand w-fit" asChild>
-                <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+                <Link href="/#request-form">
                   <Send className="w-4 h-4 mr-2" />
                   {t("write")}
-                </a>
+                </Link>
               </Button>
             </div>
           </div>

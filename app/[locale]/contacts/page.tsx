@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,14 +63,12 @@ export default function ContactsPage() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">{t("telegramLabel")}</p>
-                      <a 
-                        href="https://t.me/Ivan_Korotaev" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                      <Link
+                        href="/#request-form"
                         className="text-xl font-medium text-foreground hover:text-brand-500 transition-colors"
                       >
                         @Ivan_Korotaev
-                      </a>
+                      </Link>
                       <p className="text-sm text-muted-foreground mt-1">
                         {t("telegramHint")}
                       </p>
@@ -136,10 +135,10 @@ export default function ContactsPage() {
                     </a>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
-                    <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+                    <Link href="/#request-form">
                       <Send className="w-5 h-5 mr-2" />
                       {t("telegramButton")}
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </div>

@@ -5,7 +5,7 @@
     "payment": "To'lov",
     "guarantees": "Kafolatlar",
     "contacts": "Aloqa",
-    "write": "Yozish"
+    "write": "Ariza qoldirish"
   },
   "hero": {
     "badge": "Toshkent bo'ylab 50+ lokatsiya",
@@ -118,8 +118,9 @@
     "title": "Ariza qoldirish"
   },
   "thankYou": {
-    "title": "Arizani to'ldirganingiz uchun rahmat",
-    "description": "Arizangiz qabul qilindi, tez orada siz bilan bog'lanamiz.",
+    "title": "Arizani to'ldirganingiz uchun rahmat!",
+    "description": "Bizga Telegramda yozing",
+    "telegram": "Telegramga yozish",
     "backHome": "Bosh sahifaga"
   },
   "cta": {

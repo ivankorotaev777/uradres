@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Send } from "lucide-react";
 
 export default function ThankYouPage() {
   const t = useTranslations("thankYou");
@@ -22,12 +22,20 @@ export default function ThankYouPage() {
             <p className="text-lg text-muted-foreground mb-8">
               {t("description")}
             </p>
-            <Button size="lg" className="rounded-full bg-gradient-brand" asChild>
-              <Link href="/">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                {t("backHome")}
-              </Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className="rounded-full bg-gradient-brand hover:opacity-90 transition-all shadow-md shadow-brand-500/20 w-full sm:w-auto" asChild>
+                <a href="https://t.me/Ivan_Korotaev" target="_blank" rel="noopener noreferrer">
+                  <Send className="w-5 h-5 mr-2" />
+                  {t("telegram")}
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" className="rounded-full w-full sm:w-auto" asChild>
+                <Link href="/">
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  {t("backHome")}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
