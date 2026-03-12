@@ -506,7 +506,7 @@ const RequestFormSection = () => {
             {t("title")}
           </h2>
           <div
-            style={{ width: "80%", height: "420px", marginLeft: "auto", marginRight: "auto" }}
+            style={{ width: "80%", height: "510px", marginLeft: "auto", marginRight: "auto" }}
             data-fillout-id="ixaH3FnMAbus"
             data-fillout-embed-type="standard"
             data-fillout-inherit-parameters=""
