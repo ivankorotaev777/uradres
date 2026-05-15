@@ -6,8 +6,11 @@ export const AMO_IFRAME_ELEMENT_ID = `amoforms_iframe_${AMO_FORM_ID}`;
 export const AMO_FORM_ORIGIN = "https://forms.amocrm.ru";
 /** Vertical padding inside the form card (~0.5 cm). */
 export const AMO_FORM_CONTAINER_PADDING_Y = "0.5cm";
-export const AMO_FORM_CARD_MIN_HEIGHT_PX = 512;
-export const AMO_FORM_CARD_MAX_WIDTH_PX = 900;
+/** Layout tuning vs original 512×900 card. */
+export const AMO_FORM_HEIGHT_MULTIPLIER = 1.3;
+export const AMO_FORM_WIDTH_MULTIPLIER = 0.8;
+export const AMO_FORM_CARD_MIN_HEIGHT_PX = Math.round(512 * AMO_FORM_HEIGHT_MULTIPLIER);
+export const AMO_FORM_CARD_MAX_WIDTH_PX = Math.round(900 * AMO_FORM_WIDTH_MULTIPLIER);
 
 type AmoFormsWindow = Window & {
   amo_forms_params?: { resizeForm?: (id: string) => void };
@@ -94,9 +97,10 @@ export function getAmoResizeHeight(message: Record<string, unknown> | null): num
   return height > 0 ? height : null;
 }
 
-/** Content height for iframe/card (px); not a hardcoded layout constant. */
+/** Content height for iframe/card (px), scaled +30% so fields are not clipped. */
 export function resolveAmoFormContentHeight(heightPx: number): number {
-  return Math.max(AMO_FORM_CARD_MIN_HEIGHT_PX, heightPx);
+  const scaled = Math.ceil(heightPx * AMO_FORM_HEIGHT_MULTIPLIER);
+  return Math.max(AMO_FORM_CARD_MIN_HEIGHT_PX, scaled);
 }
 
 export function applyAmoFormResize(heightPx: number): void {
