@@ -493,19 +493,21 @@ const RequestFormSection = () => {
   return (
     <section id="request-form" ref={sectionRef} className="py-5 lg:py-7 bg-background scroll-mt-24">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center text-foreground">
             {t("title")}
           </h2>
-          <div className="w-full mx-auto rounded-xl overflow-hidden border border-border/60 bg-muted/20 shadow-sm">
-            <iframe
-              title={t("title")}
-              id={`amoforms_iframe_${AMO_FORM_ID}`}
-              name={`amoforms_iframe_${AMO_FORM_ID}`}
-              src={iframeSrc}
-              className="w-full min-h-[720px] border-0 bg-white"
-              loading="lazy"
-            />
+          <div className="flex w-full justify-center">
+            <div className="w-full max-w-[640px] rounded-xl border border-border/60 bg-muted/20 shadow-sm overflow-visible">
+              <iframe
+                title={t("title")}
+                id={`amoforms_iframe_${AMO_FORM_ID}`}
+                name={`amoforms_iframe_${AMO_FORM_ID}`}
+                src={iframeSrc}
+                className="mx-auto block h-[1320px] w-full max-w-[640px] border-0 bg-white sm:h-[1380px]"
+                loading="lazy"
+              />
+            </div>
           </div>
         </div>
       </div>
