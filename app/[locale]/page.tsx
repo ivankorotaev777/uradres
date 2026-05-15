@@ -504,7 +504,7 @@ const RequestFormSection = () => {
                 id={`amoforms_iframe_${AMO_FORM_ID}`}
                 name={`amoforms_iframe_${AMO_FORM_ID}`}
                 src={iframeSrc}
-                className="mx-auto block h-[1320px] w-full max-w-[640px] border-0 bg-white sm:h-[1380px]"
+                className="mx-auto block h-[min(840px,82dvh)] w-full max-w-[640px] min-h-[520px] border-0 bg-white sm:h-[min(880px,85dvh)]"
                 loading="lazy"
               />
             </div>
