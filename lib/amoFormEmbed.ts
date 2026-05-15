@@ -6,6 +6,8 @@ export const AMO_IFRAME_ELEMENT_ID = `amoforms_iframe_${AMO_FORM_ID}`;
 export const AMO_FORM_ORIGIN = "https://forms.amocrm.ru";
 /** Vertical padding inside the form card (~0.5 cm). */
 export const AMO_FORM_CONTAINER_PADDING_Y = "0.5cm";
+export const AMO_FORM_CARD_MIN_HEIGHT_PX = 512;
+export const AMO_FORM_CARD_MAX_WIDTH_PX = 900;
 
 type AmoFormsWindow = Window & {
   amo_forms_params?: { resizeForm?: (id: string) => void };
@@ -92,12 +94,15 @@ export function getAmoResizeHeight(message: Record<string, unknown> | null): num
   return height > 0 ? height : null;
 }
 
-export function applyAmoFormResize(heightPx: number, maxWidthPx = 640): void {
+export function applyAmoFormResize(
+  heightPx: number,
+  maxWidthPx = AMO_FORM_CARD_MAX_WIDTH_PX
+): void {
   const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID) as HTMLIFrameElement | null;
   if (!iframe) return;
 
-  iframe.style.height = `${heightPx}px`;
-  iframe.style.minHeight = "0";
+  iframe.style.height = "";
+  iframe.style.minHeight = `${heightPx}px`;
   iframe.style.maxHeight = "none";
   iframe.style.width = "100%";
   iframe.style.maxWidth = `${maxWidthPx}px`;
@@ -106,6 +111,11 @@ export function applyAmoFormResize(heightPx: number, maxWidthPx = 640): void {
   iframe.style.opacity = "1";
   iframe.style.overflow = "hidden";
   iframe.setAttribute("scrolling", "no");
+
+  const host = iframe.parentElement;
+  if (host) {
+    host.style.minHeight = `max(${AMO_FORM_CARD_MIN_HEIGHT_PX}px, ${heightPx}px)`;
+  }
 }
 
 export function applyAmoIframeVisibilityFallback(): void {
@@ -172,7 +182,7 @@ export function watchAmoFormLayout(
     const payload = parseAmoPostMessage(event.data);
     const height = getAmoResizeHeight(payload);
     if (height == null) return;
-    applyAmoFormResize(height, Number(payload?.max_width) || 640);
+    applyAmoFormResize(height, Number(payload?.max_width) || AMO_FORM_CARD_MAX_WIDTH_PX);
     onResize?.(height);
   };
 

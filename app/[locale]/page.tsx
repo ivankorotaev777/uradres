@@ -7,6 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
 import {
+  AMO_FORM_CARD_MAX_WIDTH_PX,
+  AMO_FORM_CARD_MIN_HEIGHT_PX,
   AMO_FORM_CONTAINER_PADDING_Y,
   AMO_FORM_ID,
   AMO_IFRAME_ELEMENT_ID,
@@ -556,8 +558,12 @@ const RequestFormSection = () => {
           </h2>
           <div className="flex w-full justify-center">
             <div
-              className="relative mx-auto w-full max-w-[640px] overflow-visible rounded-xl border border-border/60 bg-white shadow-sm"
+              className="relative mx-auto w-full overflow-visible rounded-xl border border-border/60 bg-white shadow-sm"
               style={{
+                maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX,
+                minHeight: formHeightPx
+                  ? `max(${AMO_FORM_CARD_MIN_HEIGHT_PX}px, ${formHeightPx}px)`
+                  : `${AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
                 paddingTop: AMO_FORM_CONTAINER_PADDING_Y,
                 paddingBottom: AMO_FORM_CONTAINER_PADDING_Y,
               }}
@@ -570,11 +576,6 @@ const RequestFormSection = () => {
                   src={iframeSrc}
                   scrolling="no"
                   className="block w-full max-w-full border-0 bg-white"
-                  style={{
-                    height: formHeightPx ? `${formHeightPx}px` : "1px",
-                    minHeight: formHeightPx ? undefined : "1px",
-                    overflow: "hidden",
-                  }}
                   allow="clipboard-read; clipboard-write"
                   onLoad={() => syncAmoFormLayout()}
                 />
