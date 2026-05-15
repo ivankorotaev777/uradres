@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
 import {
+  AMO_FORM_CONTAINER_PADDING_Y,
   AMO_FORM_ID,
   AMO_IFRAME_ELEMENT_ID,
   buildAmoIframeSrc,
@@ -500,17 +501,19 @@ const RequestFormSection = () => {
   const searchParams = useSearchParams();
 
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+  const [formHeightPx, setFormHeightPx] = useState<number | null>(null);
 
   useEffect(() => {
     const fromUrl = filterMarketingSearchParams(searchParams.toString());
     const marketing = fromUrl || getMarketingQueryFromBrowser();
     setIframeSrc(buildAmoIframeSrc(getPageUrlForAmo(), marketing));
+    setFormHeightPx(null);
   }, [searchParams]);
 
   useEffect(() => {
     if (!iframeSrc) return;
     const host = document.getElementById(AMO_IFRAME_ELEMENT_ID)?.parentElement ?? null;
-    return watchAmoFormLayout(host);
+    return watchAmoFormLayout(host, setFormHeightPx);
   }, [iframeSrc]);
 
   useEffect(() => {
@@ -552,23 +555,31 @@ const RequestFormSection = () => {
             {t("title")}
           </h2>
           <div className="flex w-full justify-center">
-            <div className="relative w-full max-w-[640px] min-h-[min(560px,88dvh)] overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm">
+            <div
+              className="relative mx-auto w-full max-w-[640px] overflow-visible rounded-xl border border-border/60 bg-white shadow-sm"
+              style={{
+                paddingTop: AMO_FORM_CONTAINER_PADDING_Y,
+                paddingBottom: AMO_FORM_CONTAINER_PADDING_Y,
+              }}
+            >
               {iframeSrc ? (
                 <iframe
                   id={AMO_IFRAME_ELEMENT_ID}
                   name={AMO_IFRAME_ELEMENT_ID}
                   title={t("title")}
                   src={iframeSrc}
-                  className="block w-full min-h-[min(560px,88dvh)] max-w-full border-0 bg-white"
-                  loading="lazy"
+                  scrolling="no"
+                  className="block w-full max-w-full border-0 bg-white"
+                  style={{
+                    height: formHeightPx ? `${formHeightPx}px` : "1px",
+                    minHeight: formHeightPx ? undefined : "1px",
+                    overflow: "hidden",
+                  }}
                   allow="clipboard-read; clipboard-write"
                   onLoad={() => syncAmoFormLayout()}
                 />
               ) : (
-                <div
-                  className="flex min-h-[min(560px,88dvh)] items-center justify-center"
-                  aria-busy="true"
-                />
+                <div className="h-24" aria-busy="true" />
               )}
             </div>
           </div>

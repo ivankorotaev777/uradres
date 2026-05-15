@@ -3,6 +3,9 @@ import { filterMarketingSearchParams } from "@/lib/marketingParams";
 export const AMO_FORM_ID = "1709794";
 export const AMO_FORM_HASH = "439d4bd7e83b262200b687bd7273ad9b";
 export const AMO_IFRAME_ELEMENT_ID = `amoforms_iframe_${AMO_FORM_ID}`;
+export const AMO_FORM_ORIGIN = "https://forms.amocrm.ru";
+/** Vertical padding inside the form card (~0.5 cm). */
+export const AMO_FORM_CONTAINER_PADDING_Y = "0.5cm";
 
 type AmoFormsWindow = Window & {
   amo_forms_params?: { resizeForm?: (id: string) => void };
@@ -68,25 +71,53 @@ export function requestAmoFormResize(): void {
   (window as AmoFormsWindow).amo_forms_params?.resizeForm?.(AMO_IFRAME_ELEMENT_ID);
 }
 
+export function parseAmoPostMessage(data: unknown): Record<string, unknown> | null {
+  let parsed: unknown = data;
+  if (typeof data === "string") {
+    try {
+      parsed = JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
+  if (!parsed || typeof parsed !== "object" || !("func" in parsed)) return null;
+  return parsed as Record<string, unknown>;
+}
+
+/** Height Amo reports for the inline iframe (px). */
+export function getAmoResizeHeight(message: Record<string, unknown> | null): number | null {
+  if (!message || message.func !== "resizeForm") return null;
+  if (message.iframe_id !== AMO_IFRAME_ELEMENT_ID) return null;
+  const height = Number(message.height);
+  return height > 0 ? height : null;
+}
+
+export function applyAmoFormResize(heightPx: number, maxWidthPx = 640): void {
+  const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID) as HTMLIFrameElement | null;
+  if (!iframe) return;
+
+  iframe.style.height = `${heightPx}px`;
+  iframe.style.minHeight = "0";
+  iframe.style.maxHeight = "none";
+  iframe.style.width = "100%";
+  iframe.style.maxWidth = `${maxWidthPx}px`;
+  iframe.style.display = "block";
+  iframe.style.position = "relative";
+  iframe.style.opacity = "1";
+  iframe.style.overflow = "hidden";
+  iframe.setAttribute("scrolling", "no");
+}
+
 export function applyAmoIframeVisibilityFallback(): void {
   const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID) as HTMLIFrameElement | null;
   if (!iframe) return;
 
-  iframe.style.position = "relative";
-  iframe.style.display = "block";
-  iframe.style.width = "100%";
-  iframe.style.maxWidth = "100%";
   iframe.style.right = "auto";
   iframe.style.bottom = "auto";
   iframe.style.zIndex = "auto";
 
-  if (iframe.style.opacity === "0" || !iframe.style.opacity) {
+  if (iframe.style.opacity === "0") {
     iframe.style.opacity = "1";
-  }
-
-  const heightPx = parseInt(iframe.style.height || "0", 10);
-  if (!heightPx || heightPx < 200) {
-    iframe.style.minHeight = "min(520px, 85vh)";
   }
 }
 
@@ -130,26 +161,44 @@ export function mountAmoFormScripts(host: HTMLElement): () => void {
   };
 }
 
-export function watchAmoFormLayout(host: HTMLElement | null): () => void {
-  if (!host || typeof window === "undefined") return () => undefined;
+export function watchAmoFormLayout(
+  host: HTMLElement | null,
+  onResize?: (heightPx: number) => void
+): () => void {
+  if (typeof window === "undefined") return () => undefined;
+
+  const onMessage = (event: MessageEvent) => {
+    if (event.origin !== AMO_FORM_ORIGIN) return;
+    const payload = parseAmoPostMessage(event.data);
+    const height = getAmoResizeHeight(payload);
+    if (height == null) return;
+    applyAmoFormResize(height, Number(payload?.max_width) || 640);
+    onResize?.(height);
+  };
+
+  window.addEventListener("message", onMessage);
 
   const run = () => syncAmoFormLayout();
-
   run();
-  const intervalId = window.setInterval(run, 600);
-  const stopIntervalId = window.setTimeout(() => window.clearInterval(intervalId), 20_000);
 
-  window.addEventListener("resize", run);
-  window.addEventListener("orientationchange", run);
+  if (host) {
+    const intervalId = window.setInterval(run, 800);
+    const stopIntervalId = window.setTimeout(() => window.clearInterval(intervalId), 15_000);
+    window.addEventListener("resize", run);
+    window.addEventListener("orientationchange", run);
 
-  const observer = new MutationObserver(run);
-  observer.observe(host, { childList: true, subtree: true });
+    const observer = new MutationObserver(run);
+    observer.observe(host, { childList: true, subtree: true });
 
-  return () => {
-    window.clearInterval(intervalId);
-    window.clearTimeout(stopIntervalId);
-    window.removeEventListener("resize", run);
-    window.removeEventListener("orientationchange", run);
-    observer.disconnect();
-  };
+    return () => {
+      window.removeEventListener("message", onMessage);
+      window.clearInterval(intervalId);
+      window.clearTimeout(stopIntervalId);
+      window.removeEventListener("resize", run);
+      window.removeEventListener("orientationchange", run);
+      observer.disconnect();
+    };
+  }
+
+  return () => window.removeEventListener("message", onMessage);
 }
