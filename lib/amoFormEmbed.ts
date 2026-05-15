@@ -27,9 +27,9 @@ export function buildAmoIframeHashParams(pageUrl: string, marketingQuery: string
     form_id: AMO_FORM_ID,
     form_hash: AMO_FORM_HASH,
     location: pageUrl,
-    has_redirect: "true",
-    success_message: encodeURI("Благодарим за заполнение формы!"),
+    has_redirect: true,
     is_modal: false,
+    success_message: encodeURI("Благодарим за заполнение формы!"),
     utm,
     ga: {},
     user_origin: {
@@ -47,9 +47,8 @@ export function buildAmoIframeSrc(pageUrl: string, marketingQuery: string): stri
       q.set(key, value);
     });
   }
-  const hash = encodeURIComponent(
-    JSON.stringify(buildAmoIframeHashParams(pageUrl, marketingQuery))
-  );
+  // Amo loader uses JSON.stringify in hash (not encodeURIComponent); Safari breaks on encoded hash.
+  const hash = JSON.stringify(buildAmoIframeHashParams(pageUrl, marketingQuery));
   return `${base}?${q.toString()}#${hash}`;
 }
 

@@ -1,11 +1,21 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
-import { AMO_FORM_ID, mountAmoFormScripts, watchAmoFormLayout } from "@/lib/amoFormEmbed";
+import {
+  AMO_FORM_ID,
+  AMO_IFRAME_ELEMENT_ID,
+  buildAmoIframeSrc,
+  getMarketingQueryFromBrowser,
+  getPageUrlForAmo,
+  syncAmoFormLayout,
+  watchAmoFormLayout,
+} from "@/lib/amoFormEmbed";
+import { filterMarketingSearchParams } from "@/lib/marketingParams";
 import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -486,22 +496,22 @@ const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
-  const formHostRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
+  const searchParams = useSearchParams();
+
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    const host = formHostRef.current;
-    if (!host) return;
+    const fromUrl = filterMarketingSearchParams(searchParams.toString());
+    const marketing = fromUrl || getMarketingQueryFromBrowser();
+    setIframeSrc(buildAmoIframeSrc(getPageUrlForAmo(), marketing));
+  }, [searchParams]);
 
-    redirectedRef.current = false;
-    const unmountScripts = mountAmoFormScripts(host);
-    const unwatchLayout = watchAmoFormLayout(host);
-
-    return () => {
-      unwatchLayout();
-      unmountScripts();
-    };
-  }, []);
+  useEffect(() => {
+    if (!iframeSrc) return;
+    const host = document.getElementById(AMO_IFRAME_ELEMENT_ID)?.parentElement ?? null;
+    return watchAmoFormLayout(host);
+  }, [iframeSrc]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -542,11 +552,25 @@ const RequestFormSection = () => {
             {t("title")}
           </h2>
           <div className="flex w-full justify-center">
-            <div
-              ref={formHostRef}
-              className="relative w-full max-w-[640px] min-h-[min(520px,85vh)] overflow-visible rounded-xl border border-border/60 bg-muted/20 shadow-sm [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!min-h-[min(480px,80vh)] [&_iframe]:!border-0 [&_iframe]:!opacity-100"
-              aria-label={t("title")}
-            />
+            <div className="relative w-full max-w-[640px] min-h-[min(560px,88dvh)] overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm">
+              {iframeSrc ? (
+                <iframe
+                  id={AMO_IFRAME_ELEMENT_ID}
+                  name={AMO_IFRAME_ELEMENT_ID}
+                  title={t("title")}
+                  src={iframeSrc}
+                  className="block w-full min-h-[min(560px,88dvh)] max-w-full border-0 bg-white"
+                  loading="lazy"
+                  allow="clipboard-read; clipboard-write"
+                  onLoad={() => syncAmoFormLayout()}
+                />
+              ) : (
+                <div
+                  className="flex min-h-[min(560px,88dvh)] items-center justify-center"
+                  aria-busy="true"
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

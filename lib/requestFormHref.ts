@@ -1,16 +1,13 @@
-import { defaultLocale, type Locale } from "@/i18n";
-
-const HASH = "#request-form";
+const HASH = "request-form";
 
 /**
- * Localized home URL with optional query string and #request-form hash.
- * Query must be preserved so UTM / gclid are not dropped when scrolling to the form.
+ * Path for next-intl `Link` (locale prefix is added automatically).
+ * Preserves marketing query before the hash so UTMs are not lost.
  */
-export function buildRequestFormHref(locale: Locale, queryWithoutLeadingQuestion: string): string {
+export function buildRequestFormHref(queryWithoutLeadingQuestion: string): string {
   const q = queryWithoutLeadingQuestion.replace(/^\?/, "").trim();
-  const suffix = q ? `?${q}${HASH}` : HASH;
-  if (locale === defaultLocale) {
-    return `/${suffix}`;
+  if (q) {
+    return `/?${q}#${HASH}`;
   }
-  return `/${locale}${suffix}`;
+  return `/#${HASH}`;
 }
