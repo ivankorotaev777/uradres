@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -470,27 +470,19 @@ const Pricing = () => {
   );
 };
 
+const AMO_FORM_ID = "1709794";
+const AMO_FORM_HASH = "439d4bd7e83b262200b687bd7273ad9b";
+
 const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const scriptId = "fillout-embed-script";
-    const existing = document.getElementById(scriptId);
-    if (existing) existing.remove();
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "https://server.fillout.com/embed/v1/";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      const s = document.getElementById(scriptId);
-      if (s) s.remove();
-    };
-  }, [locale]);
+  const iframeSrc = useMemo(
+    () =>
+      `https://forms.amocrm.ru/forms/html/form_${AMO_FORM_ID}_${AMO_FORM_HASH}.html?date=${Math.floor(Date.now() / 1000)}`,
+    []
+  );
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -502,16 +494,19 @@ const RequestFormSection = () => {
     <section id="request-form" ref={sectionRef} className="py-5 lg:py-7 bg-background scroll-mt-24">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-semibold mb-8 text-center text-foreground">
+          <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center text-foreground">
             {t("title")}
           </h2>
-          <div
-            style={{ width: "80%", height: "520px", marginLeft: "auto", marginRight: "auto" }}
-            data-fillout-id="ixaH3FnMAbus"
-            data-fillout-embed-type="standard"
-            data-fillout-inherit-parameters=""
-            data-fillout-domain="form.latenode.com"
-          />
+          <div className="w-full mx-auto rounded-xl overflow-hidden border border-border/60 bg-muted/20 shadow-sm">
+            <iframe
+              title={t("title")}
+              id={`amoforms_iframe_${AMO_FORM_ID}`}
+              name={`amoforms_iframe_${AMO_FORM_ID}`}
+              src={iframeSrc}
+              className="w-full min-h-[720px] border-0 bg-white"
+              loading="lazy"
+            />
+          </div>
         </div>
       </div>
     </section>

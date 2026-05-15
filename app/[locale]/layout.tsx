@@ -1,18 +1,11 @@
 import type { Metadata } from "next";
-import { Onest } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Script from "next/script";
-import "../globals.css";
 import { Header } from "@/components/Header";
+import { SetHtmlLang } from "@/components/SetHtmlLang";
 import { locales, type Locale } from "@/i18n";
-
-const onest = Onest({
-  variable: "--font-geist-sans",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: "ЮрАдрес — Юридический адрес в Ташкенте за 2 дня | Аренда юрадреса для ООО и ИП",
@@ -57,41 +50,38 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <head>
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-MDP27W7853"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
+    <>
+      {/* Google Analytics */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-MDP27W7853"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-MDP27W7853');
           `}
-        </Script>
-        {/* Google Ads */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17971424682"
-          strategy="afterInteractive"
-        />
-        <Script id="google-ads" strategy="afterInteractive">
-          {`
+      </Script>
+      {/* Google Ads */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=AW-17971424682"
+        strategy="afterInteractive"
+      />
+      <Script id="google-ads" strategy="afterInteractive">
+        {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'AW-17971424682');
           `}
-        </Script>
-      </head>
-      <body className={`${onest.variable} antialiased`}>
-        <NextIntlClientProvider messages={messages}>
-          <Header />
-          {children}
-        </NextIntlClientProvider>
-      </body>
-    </html>
+      </Script>
+      <NextIntlClientProvider messages={messages}>
+        <SetHtmlLang />
+        <Header />
+        {children}
+      </NextIntlClientProvider>
+    </>
   );
 }
