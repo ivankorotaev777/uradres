@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  MARKETING_STORAGE_KEY,
   filterMarketingSearchParams,
+  persistMarketingQuery,
   searchParamsHaveMarketing,
 } from "@/lib/marketingParams";
 
@@ -15,7 +15,7 @@ export function CaptureMarketingParams() {
   useEffect(() => {
     if (!searchParamsHaveMarketing(searchParams)) return;
     const filtered = filterMarketingSearchParams(searchParams.toString());
-    if (filtered) sessionStorage.setItem(MARKETING_STORAGE_KEY, filtered);
+    if (filtered) persistMarketingQuery(filtered);
   }, [searchParams]);
 
   return null;

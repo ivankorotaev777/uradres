@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
+import { mergeMarketingQuery, persistMarketingQuery } from "@/lib/marketingParams";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
 import {
   AMO_FORM_CARD_MAX_WIDTH_PX,
@@ -488,22 +489,34 @@ const RequestFormSection = () => {
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
   const formHostRef = useRef<HTMLDivElement>(null);
+  const formMountedRef = useRef(false);
   const redirectedRef = useRef(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const host = formHostRef.current;
-    if (!host) return;
+    const marketing = mergeMarketingQuery(searchParams.toString());
+    if (marketing) persistMarketingQuery(marketing);
+  }, [searchParams]);
 
+  useEffect(() => {
+    const host = formHostRef.current;
+    if (!host || formMountedRef.current) return;
+
+    formMountedRef.current = true;
     redirectedRef.current = false;
-    const unmountScripts = mountAmoFormScripts(host);
+
+    const marketing = mergeMarketingQuery(searchParams.toString());
+    const unmountScripts = mountAmoFormScripts(host, marketing);
     const unwatchLayout = watchAmoFormLayout(host);
 
     return () => {
+      formMountedRef.current = false;
       unwatchLayout();
       unmountScripts();
     };
-  }, [searchParams]);
+    // Mount once; UTM updates handled separately so replaceState does not tear down the form.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {

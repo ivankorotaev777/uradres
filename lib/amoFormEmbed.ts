@@ -7,7 +7,7 @@ export const AMO_FORM_ORIGIN = "https://forms.amocrm.ru";
 /** Vertical padding inside the form card (~0.5 cm). */
 export const AMO_FORM_CONTAINER_PADDING_Y = "0.5cm";
 /** Layout tuning vs original 512×900 card. */
-export const AMO_FORM_HEIGHT_MULTIPLIER = 1.3;
+export const AMO_FORM_HEIGHT_MULTIPLIER = 1;
 export const AMO_FORM_WIDTH_MULTIPLIER = 0.8;
 export const AMO_FORM_CARD_MIN_HEIGHT_PX = Math.round(512 * AMO_FORM_HEIGHT_MULTIPLIER);
 export const AMO_FORM_CARD_MAX_WIDTH_PX = Math.round(900 * AMO_FORM_WIDTH_MULTIPLIER);
@@ -58,6 +58,13 @@ export function buildAmoIframeHashParams(pageUrl: string, marketingQuery: string
     ga: {},
     user_origin: buildAmoUserOrigin(pageUrl),
   };
+}
+
+/** After init script: pass UTM/location into Amo before amoforms.js creates the iframe. */
+export function buildAmoSetMetaScript(pageUrl: string, marketingQuery: string): string {
+  if (!marketingQuery) return "";
+  const meta = buildAmoIframeHashParams(pageUrl, marketingQuery);
+  return `;(function(){var p=window.amo_forms_params;if(p&&p.setMeta)p.setMeta(${JSON.stringify(meta)});})();`;
 }
 
 export function buildAmoIframeSrc(pageUrl: string, marketingQuery: string): string {
@@ -179,19 +186,46 @@ export function ensureAmoIframeInHost(host: HTMLElement): void {
   syncAmoFormLayout();
 }
 
+/** Remove duplicate Amo widgets (e.g. old iframe left on `body` by amoforms.js). */
+export function removeStrayAmoFormWidgets(keepHost: HTMLElement): void {
+  const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID);
+  if (!iframe) return;
+
+  ensureAmoIframeInHost(keepHost);
+
+  const keepIframe = keepHost.querySelector(`#${AMO_IFRAME_ELEMENT_ID}`);
+  if (!keepIframe) return;
+
+  document.querySelectorAll(`#${AMO_IFRAME_ELEMENT_ID}`).forEach((node) => {
+    if (node !== keepIframe) node.remove();
+  });
+
+  document.querySelectorAll(`#amoforms_overlay_${AMO_FORM_ID}`).forEach((node) => {
+    node.remove();
+  });
+}
+
+export function teardownAmoForm(host: HTMLElement): void {
+  host.innerHTML = "";
+  delete host.dataset.amoMounted;
+  document
+    .querySelectorAll(
+      `#${AMO_IFRAME_ELEMENT_ID}, #amoforms_script_${AMO_FORM_ID}, #amoforms_overlay_${AMO_FORM_ID}`
+    )
+    .forEach((node) => node.remove());
+}
+
 /** Official Amo embed: init + amoforms.js (same as pasted snippet from AmoCRM). */
-export function mountAmoFormScripts(host: HTMLElement): () => void {
-  const existingScript = host.querySelector(`#amoforms_script_${AMO_FORM_ID}`);
-  if (existingScript) {
-    ensureAmoIframeInHost(host);
+export function mountAmoFormScripts(host: HTMLElement, marketingQuery = ""): () => void {
+  if (host.querySelector(`#amoforms_script_${AMO_FORM_ID}`)) {
+    removeStrayAmoFormWidgets(host);
     syncAmoFormLayout();
     return () => undefined;
   }
 
-  host.innerHTML = "";
-
+  const pageUrl = getPageUrlForAmo();
   const inline = document.createElement("script");
-  inline.textContent = AMO_FORMS_INIT_SCRIPT;
+  inline.textContent = AMO_FORMS_INIT_SCRIPT + buildAmoSetMetaScript(pageUrl, marketingQuery);
 
   const external = document.createElement("script");
   external.id = `amoforms_script_${AMO_FORM_ID}`;
@@ -202,27 +236,27 @@ export function mountAmoFormScripts(host: HTMLElement): () => void {
   const win = window as AmoFormsWindow;
   const onAmoReady = (params: { form_id?: number | string }) => {
     if (String(params.form_id) !== AMO_FORM_ID) return;
-    ensureAmoIframeInHost(host);
+    removeStrayAmoFormWidgets(host);
     syncAmoFormLayout();
   };
 
   external.addEventListener("load", () => {
     win.amo_forms_loaded?.(onAmoReady);
-    ensureAmoIframeInHost(host);
+    removeStrayAmoFormWidgets(host);
     syncAmoFormLayout();
   });
 
   host.appendChild(inline);
   host.appendChild(external);
 
-  const relocateId = window.setInterval(() => ensureAmoIframeInHost(host), 500);
+  const relocate = () => removeStrayAmoFormWidgets(host);
+  const relocateId = window.setInterval(relocate, 500);
   const stopRelocateId = window.setTimeout(() => window.clearInterval(relocateId), 20_000);
 
   return () => {
     window.clearInterval(relocateId);
     window.clearTimeout(stopRelocateId);
-    host.innerHTML = "";
-    document.getElementById(AMO_IFRAME_ELEMENT_ID)?.remove();
+    teardownAmoForm(host);
   };
 }
 
@@ -243,7 +277,10 @@ export function watchAmoFormLayout(
 
   window.addEventListener("message", onMessage);
 
-  const run = () => syncAmoFormLayout();
+  const run = () => {
+    if (host) removeStrayAmoFormWidgets(host);
+    syncAmoFormLayout();
+  };
   run();
 
   if (host) {
