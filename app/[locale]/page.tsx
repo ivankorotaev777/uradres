@@ -1,12 +1,11 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { Suspense, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef } from "react";
 import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
-import { filterMarketingSearchParams } from "@/lib/marketingParams";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
+import { AMO_FORMS_INIT_SCRIPT, AMO_FORMS_SCRIPT_SRC, AMO_FORM_ID } from "@/lib/amoFormEmbed";
 import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -477,28 +476,42 @@ const Pricing = ({ requestFormHref }: WithRequestFormHref) => {
   );
 };
 
-const AMO_FORM_ID = "1709794";
-const AMO_FORM_HASH = "439d4bd7e83b262200b687bd7273ad9b";
+function isAmoFormSuccessMessage(data: unknown): boolean {
+  if (data == null) return false;
+  const raw = typeof data === "string" ? data : JSON.stringify(data);
+  return raw.includes("amoformsSuccessSubmit") && raw.includes(AMO_FORM_ID);
+}
 
 const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
-  const searchParams = useSearchParams();
+  const formHostRef = useRef<HTMLDivElement>(null);
+  const redirectedRef = useRef(false);
 
-  const iframeSrc = useMemo(() => {
-    const u = new URL(
-      `https://forms.amocrm.ru/forms/html/form_${AMO_FORM_ID}_${AMO_FORM_HASH}.html`
-    );
-    u.searchParams.set("date", String(Math.floor(Date.now() / 1000)));
-    const extra = filterMarketingSearchParams(searchParams.toString());
-    if (extra) {
-      new URLSearchParams(extra).forEach((value, key) => {
-        u.searchParams.set(key, value);
-      });
-    }
-    return u.toString();
-  }, [searchParams]);
+  useEffect(() => {
+    const host = formHostRef.current;
+    if (!host) return;
+
+    redirectedRef.current = false;
+    host.innerHTML = "";
+
+    const inline = document.createElement("script");
+    inline.textContent = AMO_FORMS_INIT_SCRIPT;
+
+    const external = document.createElement("script");
+    external.id = `amoforms_script_${AMO_FORM_ID}`;
+    external.async = true;
+    external.charset = "utf-8";
+    external.src = AMO_FORMS_SCRIPT_SRC;
+
+    host.appendChild(inline);
+    host.appendChild(external);
+
+    return () => {
+      host.innerHTML = "";
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -507,23 +520,24 @@ const RequestFormSection = () => {
   }, [locale]);
 
   useEffect(() => {
-    const onMessage = (event: MessageEvent) => {
-      if (!event.origin.includes("amocrm.ru") && event.origin !== window.location.origin) return;
+    const redirectToThankYou = () => {
+      if (redirectedRef.current) return;
+      redirectedRef.current = true;
+      window.location.assign(buildThankYouUrl(locale as Locale));
+    };
 
-      let payload: { func?: string; form_id?: number | string };
-      try {
-        payload =
-          typeof event.data === "string"
-            ? (JSON.parse(event.data) as { func?: string; form_id?: number | string })
-            : (event.data as { func?: string; form_id?: number | string });
-      } catch {
+    const onMessage = (event: MessageEvent) => {
+      if (isAmoFormSuccessMessage(event.data)) {
+        redirectToThankYou();
         return;
       }
-
-      if (payload?.func !== "amoformsSuccessSubmit") return;
-      if (String(payload.form_id) !== AMO_FORM_ID) return;
-
-      window.location.assign(buildThankYouUrl(locale as Locale));
+      if (typeof event.data === "string") {
+        try {
+          if (isAmoFormSuccessMessage(JSON.parse(event.data))) redirectToThankYou();
+        } catch {
+          /* not JSON */
+        }
+      }
     };
 
     window.addEventListener("message", onMessage);
@@ -538,16 +552,11 @@ const RequestFormSection = () => {
             {t("title")}
           </h2>
           <div className="flex w-full justify-center">
-            <div className="w-full max-w-[640px] rounded-xl border border-border/60 bg-muted/20 shadow-sm overflow-visible">
-              <iframe
-                title={t("title")}
-                id={`amoforms_iframe_${AMO_FORM_ID}`}
-                name={`amoforms_iframe_${AMO_FORM_ID}`}
-                src={iframeSrc}
-                className="mx-auto block h-[min(840px,82dvh)] w-full max-w-[640px] min-h-[520px] border-0 bg-white sm:h-[min(880px,85dvh)]"
-                loading="lazy"
-              />
-            </div>
+            <div
+              ref={formHostRef}
+              className="w-full max-w-[640px] min-h-[520px] rounded-xl border border-border/60 bg-muted/20 shadow-sm overflow-visible [&_iframe]:mx-auto [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-[640px] [&_iframe]:min-h-[520px] [&_iframe]:border-0"
+              aria-label={t("title")}
+            />
           </div>
         </div>
       </div>
