@@ -9,6 +9,7 @@ import { mergeMarketingQuery, persistMarketingQuery } from "@/lib/marketingParam
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
 import {
   AMO_FORM_CARD_MAX_WIDTH_PX,
+  AMO_FORM_CARD_MIN_HEIGHT_PX,
   AMO_FORM_ORIGIN,
   getAmoFormSubmitResult,
   mountAmoFormScripts,
@@ -550,8 +551,11 @@ const RequestFormSection = () => {
           </h2>
           <div
             ref={formHostRef}
-            className="amo-form-embed mx-auto w-full [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!border-0 [&_iframe]:!opacity-100"
-            style={{ maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX }}
+            className="amo-form-embed mx-auto w-full overflow-visible [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!border-0 [&_iframe]:!opacity-100"
+            style={{
+              maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX,
+              minHeight: AMO_FORM_CARD_MIN_HEIGHT_PX,
+            }}
             aria-label={t("title")}
           />
         </div>
