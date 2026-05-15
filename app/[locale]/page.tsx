@@ -1,8 +1,11 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
+import { useRequestFormHref } from "@/hooks/useRequestFormHref";
+import { filterMarketingSearchParams } from "@/lib/marketingParams";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -27,7 +30,9 @@ import {
   Trophy
 } from "lucide-react";
 
-const Hero = () => {
+type WithRequestFormHref = { requestFormHref: string };
+
+const Hero = ({ requestFormHref }: WithRequestFormHref) => {
   const t = useTranslations("hero");
   
   return (
@@ -63,7 +68,7 @@ const Hero = () => {
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Button size="default" className="px-6 py-2.5 rounded-full bg-gradient-brand hover:opacity-90 transition-all shadow-md shadow-brand-500/20 min-w-[200px] sm:min-w-0" asChild>
-              <Link href="/#request-form" className="inline-flex items-center justify-center gap-2">
+              <Link href={requestFormHref} className="inline-flex items-center justify-center gap-2">
                 <span className="whitespace-nowrap">{t("cta")}</span>
                 <ArrowRight className="ml-2 w-4 h-4 flex-shrink-0" />
               </Link>
@@ -147,7 +152,7 @@ const PainPoints = () => {
   );
 };
 
-const Benefits = () => {
+const Benefits = ({ requestFormHref }: WithRequestFormHref) => {
   const t = useTranslations("benefits");
   const tForm = useTranslations("requestForm");
   
@@ -187,7 +192,7 @@ const Benefits = () => {
                   {t(item.highlightKey)}
                 </div>
                 <Button variant="outline" size="sm" className="w-full" asChild>
-                  <Link href="/#request-form">
+                  <Link href={requestFormHref}>
                     {tForm("title")}
                   </Link>
                 </Button>
@@ -312,7 +317,7 @@ const Product = () => {
   );
 };
 
-const Pricing = () => {
+const Pricing = ({ requestFormHref }: WithRequestFormHref) => {
   const t = useTranslations("pricing");
   
   return (
@@ -365,7 +370,7 @@ const Pricing = () => {
             </CardContent>
             <CardFooter className="pt-0">
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/#request-form">
+                <Link href={requestFormHref}>
                   {t("cta")}
                 </Link>
               </Button>
@@ -407,7 +412,7 @@ const Pricing = () => {
             </CardContent>
             <CardFooter className="pt-0">
               <Button className="w-full bg-white text-brand-700 hover:bg-brand-50 font-medium min-w-0" asChild>
-                <Link href="/#request-form" className="inline-flex items-center justify-center gap-2">
+                <Link href={requestFormHref} className="inline-flex items-center justify-center gap-2">
                   <span className="whitespace-nowrap flex-shrink-0">{t("cta")}</span>
                   <ArrowRight className="ml-2 w-4 h-4 flex-shrink-0" />
                 </Link>
@@ -445,7 +450,7 @@ const Pricing = () => {
             </CardContent>
             <CardFooter className="pt-0">
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/#request-form">
+                <Link href={requestFormHref}>
                   {t("cta")}
                 </Link>
               </Button>
@@ -477,12 +482,21 @@ const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
+  const searchParams = useSearchParams();
 
-  const iframeSrc = useMemo(
-    () =>
-      `https://forms.amocrm.ru/forms/html/form_${AMO_FORM_ID}_${AMO_FORM_HASH}.html?date=${Math.floor(Date.now() / 1000)}`,
-    []
-  );
+  const iframeSrc = useMemo(() => {
+    const u = new URL(
+      `https://forms.amocrm.ru/forms/html/form_${AMO_FORM_ID}_${AMO_FORM_HASH}.html`
+    );
+    u.searchParams.set("date", String(Math.floor(Date.now() / 1000)));
+    const extra = filterMarketingSearchParams(searchParams.toString());
+    if (extra) {
+      new URLSearchParams(extra).forEach((value, key) => {
+        u.searchParams.set(key, value);
+      });
+    }
+    return u.toString();
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -569,13 +583,23 @@ const Footer = () => {
 
 export default function Home() {
   return (
+    <Suspense fallback={<main className="min-h-screen bg-background" />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
+  const requestFormHref = useRequestFormHref();
+
+  return (
     <main className="min-h-screen">
-      <Hero />
+      <Hero requestFormHref={requestFormHref} />
       <PainPoints />
-      <Benefits />
+      <Benefits requestFormHref={requestFormHref} />
       <Testimonials />
       <Product />
-      <Pricing />
+      <Pricing requestFormHref={requestFormHref} />
       <RequestFormSection />
       <CTA />
       <Footer />

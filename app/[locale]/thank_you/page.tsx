@@ -1,12 +1,34 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowLeft, Send } from "lucide-react";
+import { MARKETING_STORAGE_KEY } from "@/lib/marketingParams";
 
 export default function ThankYouPage() {
   const t = useTranslations("thankYou");
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem(MARKETING_STORAGE_KEY);
+    if (!raw || typeof window === "undefined") return;
+
+    const current = new URLSearchParams(window.location.search);
+    const stored = new URLSearchParams(raw);
+    let changed = false;
+    stored.forEach((value, key) => {
+      if (!current.has(key)) {
+        current.set(key, value);
+        changed = true;
+      }
+    });
+    if (!changed) return;
+
+    const url = new URL(window.location.href);
+    url.search = current.toString();
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
 
   return (
     <main className="pt-20 pb-12 min-h-screen flex items-center">

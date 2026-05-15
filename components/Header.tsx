@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Send, Globe, ChevronDown } from "lucide-react";
 import { locales, localeNames, type Locale } from "@/i18n";
@@ -13,6 +14,7 @@ export function Header() {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
+  const requestFormHref = useRequestFormHref();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
 
@@ -102,7 +104,7 @@ export function Header() {
               +998 90 347 86 92
             </a>
             <Button size="sm" className="bg-gradient-brand" asChild>
-              <Link href="/#request-form">
+              <Link href={requestFormHref}>
                 <Send className="w-4 h-4 mr-2" />
                 {t("write")}
               </Link>
@@ -179,7 +181,7 @@ export function Header() {
                 +998 90 347 86 92
               </a>
               <Button size="sm" className="bg-gradient-brand w-fit" asChild>
-                <Link href="/#request-form">
+                <Link href={requestFormHref}>
                   <Send className="w-4 h-4 mr-2" />
                   {t("write")}
                 </Link>

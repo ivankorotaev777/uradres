@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Header } from "@/components/Header";
 import { SetHtmlLang } from "@/components/SetHtmlLang";
+import { CaptureMarketingParams } from "@/components/CaptureMarketingParams";
 import { locales, type Locale } from "@/i18n";
 
 export const metadata: Metadata = {
@@ -79,7 +81,12 @@ export default async function LocaleLayout({
       </Script>
       <NextIntlClientProvider messages={messages}>
         <SetHtmlLang />
-        <Header />
+        <Suspense fallback={<div className="h-[76px] w-full" aria-hidden />}>
+          <Header />
+        </Suspense>
+        <Suspense fallback={null}>
+          <CaptureMarketingParams />
+        </Suspense>
         {children}
       </NextIntlClientProvider>
     </>
