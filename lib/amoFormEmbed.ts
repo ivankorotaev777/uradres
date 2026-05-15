@@ -94,28 +94,30 @@ export function getAmoResizeHeight(message: Record<string, unknown> | null): num
   return height > 0 ? height : null;
 }
 
-export function applyAmoFormResize(
-  heightPx: number,
-  maxWidthPx = AMO_FORM_CARD_MAX_WIDTH_PX
-): void {
+/** Content height for iframe/card (px); not a hardcoded layout constant. */
+export function resolveAmoFormContentHeight(heightPx: number): number {
+  return Math.max(AMO_FORM_CARD_MIN_HEIGHT_PX, heightPx);
+}
+
+export function applyAmoFormResize(heightPx: number): void {
   const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID) as HTMLIFrameElement | null;
   if (!iframe) return;
 
-  iframe.style.height = "";
-  iframe.style.minHeight = `${heightPx}px`;
+  const contentHeight = resolveAmoFormContentHeight(heightPx);
+
+  // Iframe needs an explicit height from Amo; min-height alone leaves ~150px viewport.
+  iframe.style.height = `${contentHeight}px`;
+  iframe.style.minHeight = `${contentHeight}px`;
   iframe.style.maxHeight = "none";
   iframe.style.width = "100%";
-  iframe.style.maxWidth = `${maxWidthPx}px`;
+  iframe.style.maxWidth = "100%";
+  iframe.style.marginLeft = "auto";
+  iframe.style.marginRight = "auto";
   iframe.style.display = "block";
   iframe.style.position = "relative";
   iframe.style.opacity = "1";
   iframe.style.overflow = "hidden";
   iframe.setAttribute("scrolling", "no");
-
-  const host = iframe.parentElement;
-  if (host) {
-    host.style.minHeight = `max(${AMO_FORM_CARD_MIN_HEIGHT_PX}px, ${heightPx}px)`;
-  }
 }
 
 export function applyAmoIframeVisibilityFallback(): void {
@@ -182,8 +184,8 @@ export function watchAmoFormLayout(
     const payload = parseAmoPostMessage(event.data);
     const height = getAmoResizeHeight(payload);
     if (height == null) return;
-    applyAmoFormResize(height, Number(payload?.max_width) || AMO_FORM_CARD_MAX_WIDTH_PX);
-    onResize?.(height);
+    applyAmoFormResize(height);
+    onResize?.(resolveAmoFormContentHeight(height));
   };
 
   window.addEventListener("message", onMessage);

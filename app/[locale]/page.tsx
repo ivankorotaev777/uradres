@@ -558,12 +558,9 @@ const RequestFormSection = () => {
           </h2>
           <div className="flex w-full justify-center">
             <div
-              className="relative mx-auto w-full overflow-visible rounded-xl border border-border/60 bg-white shadow-sm"
+              className="relative mx-auto w-full overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm"
               style={{
                 maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX,
-                minHeight: formHeightPx
-                  ? `max(${AMO_FORM_CARD_MIN_HEIGHT_PX}px, ${formHeightPx}px)`
-                  : `${AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
                 paddingTop: AMO_FORM_CONTAINER_PADDING_Y,
                 paddingBottom: AMO_FORM_CONTAINER_PADDING_Y,
               }}
@@ -575,7 +572,11 @@ const RequestFormSection = () => {
                   title={t("title")}
                   src={iframeSrc}
                   scrolling="no"
-                  className="block w-full max-w-full border-0 bg-white"
+                  className="mx-auto block w-full max-w-full border-0 bg-white"
+                  style={{
+                    height: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
+                    minHeight: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
+                  }}
                   allow="clipboard-read; clipboard-write"
                   onLoad={() => syncAmoFormLayout()}
                 />
