@@ -11,14 +11,9 @@ import {
   AMO_FORM_CARD_MIN_HEIGHT_PX,
   AMO_FORM_CONTAINER_PADDING_Y,
   AMO_FORM_ID,
-  AMO_IFRAME_ELEMENT_ID,
-  buildAmoIframeSrc,
-  getMarketingQueryFromBrowser,
-  getPageUrlForAmo,
-  syncAmoFormLayout,
+  mountAmoFormScripts,
   watchAmoFormLayout,
 } from "@/lib/amoFormEmbed";
-import { filterMarketingSearchParams } from "@/lib/marketingParams";
 import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -499,24 +494,26 @@ const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
+  const formHostRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
   const searchParams = useSearchParams();
 
-  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [formHeightPx, setFormHeightPx] = useState<number | null>(null);
 
   useEffect(() => {
-    const fromUrl = filterMarketingSearchParams(searchParams.toString());
-    const marketing = fromUrl || getMarketingQueryFromBrowser();
-    setIframeSrc(buildAmoIframeSrc(getPageUrlForAmo(), marketing));
-    setFormHeightPx(null);
-  }, [searchParams]);
+    const host = formHostRef.current;
+    if (!host) return;
 
-  useEffect(() => {
-    if (!iframeSrc) return;
-    const host = document.getElementById(AMO_IFRAME_ELEMENT_ID)?.parentElement ?? null;
-    return watchAmoFormLayout(host, setFormHeightPx);
-  }, [iframeSrc]);
+    setFormHeightPx(null);
+    redirectedRef.current = false;
+    const unmountScripts = mountAmoFormScripts(host);
+    const unwatchLayout = watchAmoFormLayout(host, setFormHeightPx);
+
+    return () => {
+      unwatchLayout();
+      unmountScripts();
+    };
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -565,24 +562,14 @@ const RequestFormSection = () => {
                 paddingBottom: AMO_FORM_CONTAINER_PADDING_Y,
               }}
             >
-              {iframeSrc ? (
-                <iframe
-                  id={AMO_IFRAME_ELEMENT_ID}
-                  name={AMO_IFRAME_ELEMENT_ID}
-                  title={t("title")}
-                  src={iframeSrc}
-                  scrolling="no"
-                  className="mx-auto block w-full max-w-full border-0 bg-white"
-                  style={{
-                    height: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
-                    minHeight: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
-                  }}
-                  allow="clipboard-read; clipboard-write"
-                  onLoad={() => syncAmoFormLayout()}
-                />
-              ) : (
-                <div className="h-24" aria-busy="true" />
-              )}
+              <div
+                ref={formHostRef}
+                className="relative w-full min-h-[var(--amo-form-min-h)] [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!border-0 [&_iframe]:!opacity-100"
+                style={{
+                  minHeight: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
+                }}
+                aria-label={t("title")}
+              />
             </div>
           </div>
         </div>

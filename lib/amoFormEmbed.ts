@@ -16,8 +16,9 @@ type AmoFormsWindow = Window & {
   amo_forms_params?: { resizeForm?: (id: string) => void };
   amo_forms_loaded?: (cb: (params: { form_id?: number | string }) => void) => void;
 };
+export const AMO_FORMS_SCRIPT_VERSION = "1778863550";
 export const AMO_FORMS_SCRIPT_SRC =
-  "https://forms.amocrm.ru/forms/assets/js/amoforms.js?1778820784";
+  `https://forms.amocrm.ru/forms/assets/js/amoforms.js?${AMO_FORMS_SCRIPT_VERSION}`;
 
 export const AMO_FORMS_INIT_SCRIPT = `!function(a,m,o,c,r,m){a[o+c]=a[o+c]||{setMeta:function(p){this.params=(this.params||[]).concat([p])}},a[o+r]=a[o+r]||function(f){a[o+r].f=(a[o+r].f||[]).concat([f])},a[o+r]({id:"${AMO_FORM_ID}",hash:"${AMO_FORM_HASH}",locale:"ru"}),a[o+m]=a[o+m]||function(f,k){a[o+m].f=(a[o+m].f||[]).concat([[f,k]])}}(window,0,"amo_forms_","params","load","loaded");`;
 
