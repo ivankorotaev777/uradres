@@ -170,8 +170,21 @@ export function syncAmoFormLayout(): void {
   applyAmoIframeVisibilityFallback();
 }
 
+/** Move iframe into embed host if Amo inserted it elsewhere (e.g. body). */
+export function ensureAmoIframeInHost(host: HTMLElement): void {
+  const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID);
+  if (!iframe || iframe.parentElement === host) return;
+  const script = host.querySelector(`#amoforms_script_${AMO_FORM_ID}`);
+  host.insertBefore(iframe, script ?? null);
+  syncAmoFormLayout();
+}
+
+/** Official Amo embed: init + amoforms.js (same as pasted snippet from AmoCRM). */
 export function mountAmoFormScripts(host: HTMLElement): () => void {
-  if (host.querySelector(`#amoforms_script_${AMO_FORM_ID}`)) {
+  const existingScript = host.querySelector(`#amoforms_script_${AMO_FORM_ID}`);
+  if (existingScript) {
+    ensureAmoIframeInHost(host);
+    syncAmoFormLayout();
     return () => undefined;
   }
 
@@ -189,19 +202,27 @@ export function mountAmoFormScripts(host: HTMLElement): () => void {
   const win = window as AmoFormsWindow;
   const onAmoReady = (params: { form_id?: number | string }) => {
     if (String(params.form_id) !== AMO_FORM_ID) return;
+    ensureAmoIframeInHost(host);
     syncAmoFormLayout();
   };
 
   external.addEventListener("load", () => {
     win.amo_forms_loaded?.(onAmoReady);
+    ensureAmoIframeInHost(host);
     syncAmoFormLayout();
   });
 
   host.appendChild(inline);
   host.appendChild(external);
 
+  const relocateId = window.setInterval(() => ensureAmoIframeInHost(host), 500);
+  const stopRelocateId = window.setTimeout(() => window.clearInterval(relocateId), 20_000);
+
   return () => {
+    window.clearInterval(relocateId);
+    window.clearTimeout(stopRelocateId);
     host.innerHTML = "";
+    document.getElementById(AMO_IFRAME_ELEMENT_ID)?.remove();
   };
 }
 

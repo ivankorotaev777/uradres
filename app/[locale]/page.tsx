@@ -1,25 +1,18 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
 import {
   AMO_FORM_CARD_MAX_WIDTH_PX,
-  AMO_FORM_CARD_MIN_HEIGHT_PX,
-  AMO_FORM_CONTAINER_PADDING_Y,
   AMO_FORM_ORIGIN,
-  AMO_IFRAME_ELEMENT_ID,
-  buildAmoIframeSrc,
   getAmoFormSubmitResult,
-  getMarketingQueryFromBrowser,
-  getPageUrlForAmo,
-  syncAmoFormLayout,
+  mountAmoFormScripts,
   watchAmoFormLayout,
 } from "@/lib/amoFormEmbed";
-import { filterMarketingSearchParams } from "@/lib/marketingParams";
 import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -494,25 +487,23 @@ const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
+  const formHostRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
   const searchParams = useSearchParams();
 
-  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
-  const [formHeightPx, setFormHeightPx] = useState<number | null>(null);
-
   useEffect(() => {
-    const fromUrl = filterMarketingSearchParams(searchParams.toString());
-    const marketing = fromUrl || getMarketingQueryFromBrowser();
-    setIframeSrc(buildAmoIframeSrc(getPageUrlForAmo(), marketing));
-    setFormHeightPx(null);
+    const host = formHostRef.current;
+    if (!host) return;
+
     redirectedRef.current = false;
-  }, [searchParams]);
+    const unmountScripts = mountAmoFormScripts(host);
+    const unwatchLayout = watchAmoFormLayout(host);
 
-  useEffect(() => {
-    if (!iframeSrc) return;
-    const host = document.getElementById(AMO_IFRAME_ELEMENT_ID)?.parentElement ?? null;
-    return watchAmoFormLayout(host, setFormHeightPx);
-  }, [iframeSrc]);
+    return () => {
+      unwatchLayout();
+      unmountScripts();
+    };
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -544,39 +535,12 @@ const RequestFormSection = () => {
           <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center text-foreground">
             {t("title")}
           </h2>
-          <div className="flex w-full justify-center">
-            <div
-              className="relative mx-auto w-full overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm"
-              style={{
-                maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX,
-                paddingTop: AMO_FORM_CONTAINER_PADDING_Y,
-                paddingBottom: AMO_FORM_CONTAINER_PADDING_Y,
-              }}
-            >
-              {iframeSrc ? (
-                <iframe
-                  id={AMO_IFRAME_ELEMENT_ID}
-                  name={AMO_IFRAME_ELEMENT_ID}
-                  title={t("title")}
-                  src={iframeSrc}
-                  scrolling="no"
-                  className="mx-auto block w-full max-w-full border-0 bg-white"
-                  style={{
-                    height: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
-                    minHeight: `${formHeightPx ?? AMO_FORM_CARD_MIN_HEIGHT_PX}px`,
-                  }}
-                  allow="clipboard-read; clipboard-write"
-                  onLoad={() => syncAmoFormLayout()}
-                />
-              ) : (
-                <div
-                  style={{ minHeight: AMO_FORM_CARD_MIN_HEIGHT_PX }}
-                  className="w-full"
-                  aria-busy="true"
-                />
-              )}
-            </div>
-          </div>
+          <div
+            ref={formHostRef}
+            className="amo-form-embed mx-auto w-full [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!border-0 [&_iframe]:!opacity-100"
+            style={{ maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX }}
+            aria-label={t("title")}
+          />
         </div>
       </div>
     </section>
