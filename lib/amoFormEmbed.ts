@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n";
 import { filterMarketingSearchParams } from "@/lib/marketingParams";
 
 export const AMO_FORM_ID = "1709794";
@@ -18,6 +19,21 @@ type AmoFormsWindow = Window & {
   amo_forms_params?: { resizeForm?: (id: string) => void };
   amo_forms_loaded?: (cb: (params: { form_id?: number | string }) => void) => void;
 };
+
+function amoFormsScriptId(siteLocale: string): string {
+  return `amoforms_script_${AMO_FORM_ID}_${siteLocale}`;
+}
+
+function isAmoFormsLibLoaded(): boolean {
+  return Boolean(
+    document.querySelector('script[src*="forms.amocrm.ru/forms/assets/js/amoforms.js"]')
+  );
+}
+
+function findAmoScriptInHost(host: HTMLElement): Element | null {
+  return host.querySelector(`[id^="amoforms_script_${AMO_FORM_ID}"]`);
+}
+
 export const AMO_FORMS_SCRIPT_VERSION = "1778863550";
 export const AMO_FORMS_SCRIPT_SRC =
   `https://forms.amocrm.ru/forms/assets/js/amoforms.js?${AMO_FORMS_SCRIPT_VERSION}`;
@@ -183,7 +199,7 @@ export function syncAmoFormLayout(): void {
 export function ensureAmoIframeInHost(host: HTMLElement): void {
   const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID);
   if (!iframe || iframe.parentElement === host) return;
-  const script = host.querySelector(`#amoforms_script_${AMO_FORM_ID}`);
+  const script = findAmoScriptInHost(host);
   host.insertBefore(iframe, script ?? null);
   syncAmoFormLayout();
 }
@@ -212,50 +228,65 @@ export function teardownAmoForm(host: HTMLElement): void {
   delete host.dataset.amoMounted;
   document
     .querySelectorAll(
-      `#${AMO_IFRAME_ELEMENT_ID}, #amoforms_script_${AMO_FORM_ID}, #amoforms_overlay_${AMO_FORM_ID}`
+      `#${AMO_IFRAME_ELEMENT_ID}, [id^="amoforms_script_${AMO_FORM_ID}"], #amoforms_overlay_${AMO_FORM_ID}`
     )
     .forEach((node) => node.remove());
 }
 
+function runAfterAmoEmbed(
+  host: HTMLElement,
+  onReady: (params: { form_id?: number | string }) => void
+): void {
+  const win = window as AmoFormsWindow;
+  win.amo_forms_loaded?.(onReady);
+  removeStrayAmoFormWidgets(host);
+  syncAmoFormLayout();
+}
+
 /** Official Amo embed: init + amoforms.js (same as pasted snippet from AmoCRM). */
-export function mountAmoFormScripts(host: HTMLElement, marketingQuery = ""): () => void {
-  if (host.querySelector(`#amoforms_script_${AMO_FORM_ID}`)) {
-    removeStrayAmoFormWidgets(host);
-    syncAmoFormLayout();
-    return () => undefined;
-  }
+export function mountAmoFormScripts(
+  host: HTMLElement,
+  marketingQuery = "",
+  siteLocale: Locale = "ru"
+): () => void {
+  teardownAmoForm(host);
 
   const pageUrl = getPageUrlForAmo();
   const inline = document.createElement("script");
   inline.textContent = AMO_FORMS_INIT_SCRIPT + buildAmoSetMetaScript(pageUrl, marketingQuery);
 
-  const external = document.createElement("script");
-  external.id = `amoforms_script_${AMO_FORM_ID}`;
-  external.async = true;
-  external.charset = "utf-8";
-  external.src = AMO_FORMS_SCRIPT_SRC;
-
-  const win = window as AmoFormsWindow;
   const onAmoReady = (params: { form_id?: number | string }) => {
     if (String(params.form_id) !== AMO_FORM_ID) return;
     removeStrayAmoFormWidgets(host);
     syncAmoFormLayout();
   };
 
-  external.addEventListener("load", () => {
-    win.amo_forms_loaded?.(onAmoReady);
-    removeStrayAmoFormWidgets(host);
-    syncAmoFormLayout();
-  });
-
   host.appendChild(inline);
-  host.appendChild(external);
+
+  const afterLoadIds: number[] = [];
+  const libLoaded = isAmoFormsLibLoaded();
+
+  if (libLoaded) {
+    // amoforms.js stays in memory after locale switch — re-append does not re-run the file.
+    runAfterAmoEmbed(host, onAmoReady);
+    afterLoadIds.push(window.setTimeout(() => runAfterAmoEmbed(host, onAmoReady), 300));
+    afterLoadIds.push(window.setTimeout(() => runAfterAmoEmbed(host, onAmoReady), 1200));
+  } else {
+    const external = document.createElement("script");
+    external.id = amoFormsScriptId(siteLocale);
+    external.async = true;
+    external.charset = "utf-8";
+    external.src = AMO_FORMS_SCRIPT_SRC;
+    external.addEventListener("load", () => runAfterAmoEmbed(host, onAmoReady));
+    host.appendChild(external);
+  }
 
   const relocate = () => removeStrayAmoFormWidgets(host);
   const relocateId = window.setInterval(relocate, 500);
   const stopRelocateId = window.setTimeout(() => window.clearInterval(relocateId), 20_000);
 
   return () => {
+    afterLoadIds.forEach((id) => window.clearTimeout(id));
     window.clearInterval(relocateId);
     window.clearTimeout(stopRelocateId);
     teardownAmoForm(host);

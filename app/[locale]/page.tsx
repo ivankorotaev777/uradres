@@ -490,7 +490,6 @@ const RequestFormSection = () => {
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
   const formHostRef = useRef<HTMLDivElement>(null);
-  const formMountedRef = useRef(false);
   const redirectedRef = useRef(false);
   const searchParams = useSearchParams();
 
@@ -501,23 +500,20 @@ const RequestFormSection = () => {
 
   useEffect(() => {
     const host = formHostRef.current;
-    if (!host || formMountedRef.current) return;
+    if (!host) return;
 
-    formMountedRef.current = true;
     redirectedRef.current = false;
 
     const marketing = mergeMarketingQuery(searchParams.toString());
-    const unmountScripts = mountAmoFormScripts(host, marketing);
+    const unmountScripts = mountAmoFormScripts(host, marketing, locale as Locale);
     const unwatchLayout = watchAmoFormLayout(host);
 
     return () => {
-      formMountedRef.current = false;
       unwatchLayout();
       unmountScripts();
     };
-    // Mount once; UTM updates handled separately so replaceState does not tear down the form.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Remount when locale changes (language switcher). UTM-only updates: effect above.
+  }, [locale]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
@@ -625,6 +621,7 @@ export default function Home() {
 }
 
 function HomeContent() {
+  const locale = useLocale();
   const requestFormHref = useRequestFormHref();
 
   return (
@@ -635,7 +632,7 @@ function HomeContent() {
       <Testimonials />
       <Product />
       <Pricing requestFormHref={requestFormHref} />
-      <RequestFormSection />
+      <RequestFormSection key={locale} />
       <CTA />
       <Footer />
     </main>
