@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { filterMarketingSearchParams } from "@/lib/marketingParams";
+import { buildThankYouUrl } from "@/lib/thankYouUrl";
+import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -502,6 +504,30 @@ const RequestFormSection = () => {
     if (typeof window !== "undefined" && window.location.hash === "#request-form" && sectionRef.current) {
       sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  }, [locale]);
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (!event.origin.includes("amocrm.ru") && event.origin !== window.location.origin) return;
+
+      let payload: { func?: string; form_id?: number | string };
+      try {
+        payload =
+          typeof event.data === "string"
+            ? (JSON.parse(event.data) as { func?: string; form_id?: number | string })
+            : (event.data as { func?: string; form_id?: number | string });
+      } catch {
+        return;
+      }
+
+      if (payload?.func !== "amoformsSuccessSubmit") return;
+      if (String(payload.form_id) !== AMO_FORM_ID) return;
+
+      window.location.assign(buildThankYouUrl(locale as Locale));
+    };
+
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
   }, [locale]);
 
   return (
