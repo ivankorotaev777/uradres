@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
-import { AMO_FORMS_INIT_SCRIPT, AMO_FORMS_SCRIPT_SRC, AMO_FORM_ID } from "@/lib/amoFormEmbed";
+import { AMO_FORM_ID, mountAmoFormScripts, watchAmoFormLayout } from "@/lib/amoFormEmbed";
 import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -494,22 +494,12 @@ const RequestFormSection = () => {
     if (!host) return;
 
     redirectedRef.current = false;
-    host.innerHTML = "";
-
-    const inline = document.createElement("script");
-    inline.textContent = AMO_FORMS_INIT_SCRIPT;
-
-    const external = document.createElement("script");
-    external.id = `amoforms_script_${AMO_FORM_ID}`;
-    external.async = true;
-    external.charset = "utf-8";
-    external.src = AMO_FORMS_SCRIPT_SRC;
-
-    host.appendChild(inline);
-    host.appendChild(external);
+    const unmountScripts = mountAmoFormScripts(host);
+    const unwatchLayout = watchAmoFormLayout(host);
 
     return () => {
-      host.innerHTML = "";
+      unwatchLayout();
+      unmountScripts();
     };
   }, []);
 
@@ -554,7 +544,7 @@ const RequestFormSection = () => {
           <div className="flex w-full justify-center">
             <div
               ref={formHostRef}
-              className="w-full max-w-[640px] min-h-[520px] rounded-xl border border-border/60 bg-muted/20 shadow-sm overflow-visible [&_iframe]:mx-auto [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-[640px] [&_iframe]:min-h-[520px] [&_iframe]:border-0"
+              className="relative w-full max-w-[640px] min-h-[min(520px,85vh)] overflow-visible rounded-xl border border-border/60 bg-muted/20 shadow-sm [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!min-h-[min(480px,80vh)] [&_iframe]:!border-0 [&_iframe]:!opacity-100"
               aria-label={t("title")}
             />
           </div>
