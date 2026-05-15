@@ -22,6 +22,21 @@ export const AMO_FORMS_SCRIPT_SRC =
 
 export const AMO_FORMS_INIT_SCRIPT = `!function(a,m,o,c,r,m){a[o+c]=a[o+c]||{setMeta:function(p){this.params=(this.params||[]).concat([p])}},a[o+r]=a[o+r]||function(f){a[o+r].f=(a[o+r].f||[]).concat([f])},a[o+r]({id:"${AMO_FORM_ID}",hash:"${AMO_FORM_HASH}",locale:"ru"}),a[o+m]=a[o+m]||function(f,k){a[o+m].f=(a[o+m].f||[]).concat([[f,k]])}}(window,0,"amo_forms_","params","load","loaded");`;
 
+function buildAmoUserOrigin(pageUrl: string) {
+  if (typeof window === "undefined") {
+    return {
+      datetime: new Date().toUTCString(),
+      timezone: "UTC",
+      referer: pageUrl,
+    };
+  }
+  return {
+    datetime: `${new Date().toDateString()} ${new Date().toTimeString()}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    referer: document.referrer || pageUrl,
+  };
+}
+
 /** Params Amo expects in iframe location.hash (see amoforms.js loader). */
 export function buildAmoIframeHashParams(pageUrl: string, marketingQuery: string) {
   const utm: Record<string, string> = {};
@@ -36,14 +51,12 @@ export function buildAmoIframeHashParams(pageUrl: string, marketingQuery: string
     form_id: AMO_FORM_ID,
     form_hash: AMO_FORM_HASH,
     location: pageUrl,
-    has_redirect: true,
+    has_redirect: "true",
     is_modal: false,
     success_message: encodeURI("Благодарим за заполнение формы!"),
     utm,
     ga: {},
-    user_origin: {
-      datetime: new Date().toString(),
-    },
+    user_origin: buildAmoUserOrigin(pageUrl),
   };
 }
 
@@ -51,14 +64,28 @@ export function buildAmoIframeSrc(pageUrl: string, marketingQuery: string): stri
   const base = `https://forms.amocrm.ru/forms/html/form_${AMO_FORM_ID}_${AMO_FORM_HASH}.html`;
   const q = new URLSearchParams();
   q.set("date", String(Math.floor(Date.now() / 1000)));
-  if (marketingQuery) {
-    new URLSearchParams(marketingQuery).forEach((value, key) => {
-      q.set(key, value);
-    });
-  }
-  // Amo loader uses JSON.stringify in hash (not encodeURIComponent); Safari breaks on encoded hash.
+  // UTMs belong in the hash only; extra query params can break Amo validation.
   const hash = JSON.stringify(buildAmoIframeHashParams(pageUrl, marketingQuery));
   return `${base}?${q.toString()}#${hash}`;
+}
+
+export type AmoFormSubmitResult = "success" | "fail";
+
+/** Detect success/fail from iframe postMessage (official Amo events or API-shaped payloads). */
+export function getAmoFormSubmitResult(data: unknown): AmoFormSubmitResult | null {
+  const payload = parseAmoPostMessage(data);
+  if (payload) {
+    if (payload.func === "amoformsSuccessSubmit") return "success";
+    if (payload.func === "amoformsFailSubmit") return "fail";
+    if (payload.error_code === 0) return "success";
+    if (typeof payload.error_code === "number" && payload.error_code !== 0) return "fail";
+  }
+
+  if (data == null) return null;
+  const raw = typeof data === "string" ? data : JSON.stringify(data);
+  if (raw.includes("amoformsSuccessSubmit") && raw.includes(AMO_FORM_ID)) return "success";
+  if (raw.includes("amoformsFailSubmit")) return "fail";
+  return null;
 }
 
 export function getPageUrlForAmo(): string {

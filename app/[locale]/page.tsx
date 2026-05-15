@@ -10,9 +10,10 @@ import {
   AMO_FORM_CARD_MAX_WIDTH_PX,
   AMO_FORM_CARD_MIN_HEIGHT_PX,
   AMO_FORM_CONTAINER_PADDING_Y,
-  AMO_FORM_ID,
+  AMO_FORM_ORIGIN,
   AMO_IFRAME_ELEMENT_ID,
   buildAmoIframeSrc,
+  getAmoFormSubmitResult,
   getMarketingQueryFromBrowser,
   getPageUrlForAmo,
   syncAmoFormLayout,
@@ -489,12 +490,6 @@ const Pricing = ({ requestFormHref }: WithRequestFormHref) => {
   );
 };
 
-function isAmoFormSuccessMessage(data: unknown): boolean {
-  if (data == null) return false;
-  const raw = typeof data === "string" ? data : JSON.stringify(data);
-  return raw.includes("amoformsSuccessSubmit") && raw.includes(AMO_FORM_ID);
-}
-
 const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
@@ -533,17 +528,9 @@ const RequestFormSection = () => {
     };
 
     const onMessage = (event: MessageEvent) => {
-      if (isAmoFormSuccessMessage(event.data)) {
-        redirectToThankYou();
-        return;
-      }
-      if (typeof event.data === "string") {
-        try {
-          if (isAmoFormSuccessMessage(JSON.parse(event.data))) redirectToThankYou();
-        } catch {
-          /* not JSON */
-        }
-      }
+      if (event.origin !== AMO_FORM_ORIGIN) return;
+      const result = getAmoFormSubmitResult(event.data);
+      if (result === "success") redirectToThankYou();
     };
 
     window.addEventListener("message", onMessage);
