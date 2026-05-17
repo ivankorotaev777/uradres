@@ -7,14 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { useRequestFormHref } from "@/hooks/useRequestFormHref";
 import { mergeMarketingQuery, persistMarketingQuery } from "@/lib/marketingParams";
 import { buildThankYouUrl } from "@/lib/thankYouUrl";
-import {
-  AMO_FORM_CARD_MAX_WIDTH_PX,
-  AMO_FORM_CARD_MIN_HEIGHT_PX,
-  AMO_FORM_ORIGIN,
-  getAmoFormSubmitResult,
-  mountAmoFormScripts,
-  watchAmoFormLayout,
-} from "@/lib/amoFormEmbed";
+import { AmoFormEmbed } from "@/components/AmoFormEmbed";
+import { AMO_FORM_ORIGIN, getAmoFormSubmitResult } from "@/lib/amoFormEmbed";
 import type { Locale } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -489,30 +483,16 @@ const RequestFormSection = () => {
   const t = useTranslations("requestForm");
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
-  const formHostRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
   const searchParams = useSearchParams();
+  const marketing = mergeMarketingQuery(searchParams.toString());
 
   useEffect(() => {
-    const marketing = mergeMarketingQuery(searchParams.toString());
     if (marketing) persistMarketingQuery(marketing);
-  }, [searchParams]);
+  }, [searchParams, marketing]);
 
   useEffect(() => {
-    const host = formHostRef.current;
-    if (!host) return;
-
     redirectedRef.current = false;
-
-    const marketing = mergeMarketingQuery(searchParams.toString());
-    const unmountScripts = mountAmoFormScripts(host, marketing, locale as Locale);
-    const unwatchLayout = watchAmoFormLayout(host);
-
-    return () => {
-      unwatchLayout();
-      unmountScripts();
-    };
-    // Remount when locale changes (language switcher). UTM-only updates: effect above.
   }, [locale]);
 
   useEffect(() => {
@@ -545,15 +525,7 @@ const RequestFormSection = () => {
           <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center text-foreground">
             {t("title")}
           </h2>
-          <div
-            ref={formHostRef}
-            className="amo-form-embed mx-auto w-full overflow-visible [&_iframe]:!relative [&_iframe]:!mx-auto [&_iframe]:!block [&_iframe]:!w-full [&_iframe]:!max-w-full [&_iframe]:!border-0 [&_iframe]:!opacity-100"
-            style={{
-              maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX,
-              minHeight: AMO_FORM_CARD_MIN_HEIGHT_PX,
-            }}
-            aria-label={t("title")}
-          />
+          <AmoFormEmbed key={locale} marketingQuery={marketing} aria-label={t("title")} />
         </div>
       </div>
     </section>
@@ -621,7 +593,6 @@ export default function Home() {
 }
 
 function HomeContent() {
-  const locale = useLocale();
   const requestFormHref = useRequestFormHref();
 
   return (
@@ -632,7 +603,7 @@ function HomeContent() {
       <Testimonials />
       <Product />
       <Pricing requestFormHref={requestFormHref} />
-      <RequestFormSection key={locale} />
+      <RequestFormSection />
       <CTA />
       <Footer />
     </main>
