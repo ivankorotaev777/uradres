@@ -76,8 +76,9 @@
   }
 }
 
-/* Smooth scroll behavior */
+/* Smooth scroll + force light color scheme (no browser auto-dark on Android) */
 html {
+  color-scheme: only light;
   scroll-behavior: smooth;
 }
 
