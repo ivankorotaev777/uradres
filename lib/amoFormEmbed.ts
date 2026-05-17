@@ -190,6 +190,9 @@ export function applyAmoFormResize(heightPx: number): void {
   iframe.style.maxWidth = "100%";
   iframe.style.marginLeft = "auto";
   iframe.style.marginRight = "auto";
+  iframe.style.left = "auto";
+  iframe.style.right = "auto";
+  iframe.style.transform = "none";
   iframe.style.display = "block";
   iframe.style.position = "relative";
   iframe.style.opacity = "1";
@@ -201,8 +204,11 @@ export function applyAmoIframeVisibilityFallback(): void {
   const iframe = document.getElementById(AMO_IFRAME_ELEMENT_ID) as HTMLIFrameElement | null;
   if (!iframe) return;
 
+  iframe.style.left = "auto";
   iframe.style.right = "auto";
   iframe.style.bottom = "auto";
+  iframe.style.top = "auto";
+  iframe.style.transform = "none";
   iframe.style.zIndex = "auto";
 
   if (iframe.style.opacity === "0") {

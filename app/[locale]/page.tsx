@@ -521,8 +521,8 @@ const RequestFormSection = () => {
   return (
     <section id="request-form" ref={sectionRef} className="py-5 lg:py-7 bg-background scroll-mt-24">
       <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center text-foreground">
+        <div className="max-w-5xl mx-auto flex flex-col items-center">
+          <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-center text-foreground w-full">
             {t("title")}
           </h2>
           <AmoFormEmbed key={locale} marketingQuery={marketing} aria-label={t("title")} />

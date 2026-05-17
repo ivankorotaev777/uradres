@@ -77,7 +77,10 @@ function AmoFormEmbedInner({
     <div
       ref={containerRef}
       data-uradres-amo-host
-      className={cn("amo-form-host amo-form-embed w-full flex flex-col items-center", className)}
+      className={cn(
+        "amo-form-host amo-form-embed mx-auto w-full max-w-full flex flex-col items-center justify-center",
+        className
+      )}
       style={{
         maxWidth: AMO_FORM_CARD_MAX_WIDTH_PX,
         minHeight: AMO_FORM_CARD_MIN_HEIGHT_PX,
